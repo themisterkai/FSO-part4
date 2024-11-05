@@ -1,26 +1,79 @@
 const blogsRouter = require('express').Router();
 const Blog = require('../models/blog');
+const User = require('../models/user');
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({});
+  const userId = request.user._id.toString();
+  const user = await User.findById(userId);
+  if (user == null) {
+    return response.status(401).json({
+      error: 'unauthorized',
+    });
+  }
+  const blogs = await Blog.find({}).populate('user', {
+    username: 1,
+    name: 1,
+  });
   return response.json(blogs);
 });
 
 blogsRouter.post('/', async (request, response) => {
-  const blog = new Blog(request.body);
+  const body = request.body;
+  const userId = request.user._id.toString();
+  const user = await User.findById(userId);
+  if (user == null) {
+    return response.status(401).json({
+      error: 'unauthorized',
+    });
+  }
+
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes,
+    user: userId,
+  });
 
   const savedBlog = await blog.save();
+  user.blogs = user.blogs.concat(savedBlog.id);
+  await user.save();
   return response.status(201).json(savedBlog);
 });
 
 blogsRouter.delete('/:id', async (request, response) => {
+  const body = request.body;
+  const userId = request.user._id.toString();
+  const user = await User.findById(userId);
+  if (user == null) {
+    return response.status(401).json({
+      error: 'unauthorized',
+    });
+  }
+
+  const blogToDelete = await Blog.findById(request.params.id);
+  // we will only allow deletion if the blog was added by the same user that is
+  // making the requests.
+  // Some blogs may not have a user field. We also won't allow deletion of these.
+  if (blogToDelete.user == null || blogToDelete.user.toString() !== userId) {
+    return response.status(401).json({
+      error: 'unauthorized',
+    });
+  }
+
   await Blog.findByIdAndDelete(request.params.id);
   return response.status(204).end();
 });
 
 blogsRouter.put('/:id', async (request, response) => {
   const body = request.body;
-  console.log('*************in PUT', request.params.id, body);
+  const userId = request.user._id.toString();
+  const user = await User.findById(userId);
+  if (user == null) {
+    return response.status(401).json({
+      error: 'unauthorized',
+    });
+  }
 
   const blog = {
     title: body.title,
@@ -35,7 +88,6 @@ blogsRouter.put('/:id', async (request, response) => {
     context: 'query',
   });
 
-  console.log('*************in PUT!!!', updatedBlog);
   return response.json(updatedBlog);
 });
 
