@@ -31,13 +31,13 @@ const AddBlog = ({
       <div>
         url
         <input
-          type="url"
+          type="text"
           value={url}
           name="URL"
           onChange={({ target }) => setURL(target.value)}
         />
       </div>
-      <button type="submit">login</button>
+      <button type="submit">create</button>
     </form>
   </>
 );
