@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Blog from './components/Blog';
 import Login from './components/Login';
 import AddBlog from './components/AddBlog';
 import Notification from './components/Notification';
 import blogService from './services/blogs';
 import loginServices from './services/login';
+import Togglable from './components/Toggable';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -16,6 +17,8 @@ const App = () => {
   const [url, setURL] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
+
+  const blogsFormRef = useRef();
 
   useEffect(() => {
     const loggedInUser = window.localStorage.getItem('loggedInUser');
@@ -77,6 +80,7 @@ const App = () => {
         title,
         url,
       });
+      blogsFormRef.current.toggleVisibility();
       setBlogs([...blogs, newBlog]);
       setTitle('');
       setAuthor('');
@@ -110,15 +114,17 @@ const App = () => {
         <div>
           <div>{user.name} logged in</div>
           <button onClick={handleLogout}>logout</button>
-          <AddBlog
-            title={title}
-            setTitle={setTitle}
-            author={author}
-            setAuthor={setAuthor}
-            url={url}
-            setURL={setURL}
-            handleAdd={handleAdd}
-          />
+          <Togglable buttonLabel="create" ref={blogsFormRef}>
+            <AddBlog
+              title={title}
+              setTitle={setTitle}
+              author={author}
+              setAuthor={setAuthor}
+              url={url}
+              setURL={setURL}
+              handleAdd={handleAdd}
+            />
+          </Togglable>
           <h2>blogs</h2>
           {blogs.map(blog => (
             <Blog key={blog.id} blog={blog} />
