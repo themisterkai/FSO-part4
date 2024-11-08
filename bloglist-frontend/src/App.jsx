@@ -12,9 +12,6 @@ const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setURL] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
@@ -30,8 +27,9 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    console.log('getting blogs!');
     blogService.getAll().then(blogs => setBlogs(blogs));
-  }, [user, blogs]);
+  }, [user]);
 
   const handleLogin = async event => {
     event.preventDefault();
@@ -72,20 +70,14 @@ const App = () => {
     }, 5000);
   };
 
-  const handleAdd = async event => {
-    event.preventDefault();
+  const handleAdd = async blogObject => {
     try {
-      const newBlog = await blogService.create({
-        author,
-        title,
-        url,
-      });
+      const newBlog = await blogService.create(blogObject);
       blogsFormRef.current.toggleVisibility();
       setBlogs([...blogs, newBlog]);
-      setTitle('');
-      setAuthor('');
-      setURL('');
-      handleMessage(`a new blog ${title} by ${author} added`);
+      handleMessage(
+        `a new blog ${blogObject.title} by ${blogObject.author} added`
+      );
     } catch (e) {
       handleErrorMessage(e.response.data.error);
     }
@@ -115,15 +107,7 @@ const App = () => {
           <div>{user.name} logged in</div>
           <button onClick={handleLogout}>logout</button>
           <Togglable buttonLabel="create" ref={blogsFormRef}>
-            <AddBlog
-              title={title}
-              setTitle={setTitle}
-              author={author}
-              setAuthor={setAuthor}
-              url={url}
-              setURL={setURL}
-              handleAdd={handleAdd}
-            />
+            <AddBlog handleAdd={handleAdd} />
           </Togglable>
           <h2>blogs</h2>
           {blogs.map(blog => (
