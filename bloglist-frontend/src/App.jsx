@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Blog from './components/Blog';
 import Login from './components/Login';
 import AddBlog from './components/AddBlog';
+import Notification from './components/Notification';
 import blogService from './services/blogs';
 import loginServices from './services/login';
 
@@ -13,6 +14,8 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setURL] = useState('');
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const loggedInUser = window.localStorage.getItem('loggedInUser');
@@ -29,7 +32,6 @@ const App = () => {
 
   const handleLogin = async event => {
     event.preventDefault();
-    console.log(username, password);
 
     try {
       const userFromLogin = await loginServices.login({
@@ -37,7 +39,6 @@ const App = () => {
         password,
       });
       setUser(userFromLogin);
-      console.log(userFromLogin);
       window.localStorage.setItem(
         'loggedInUser',
         JSON.stringify(userFromLogin)
@@ -45,9 +46,27 @@ const App = () => {
       blogService.setToken(userFromLogin.token);
       setUsername('');
       setPassword('');
+      handleMessage(`${userFromLogin.name} successfully logged in`);
     } catch (e) {
-      console.log('error', e);
+      handleErrorMessage(e.response.data.error);
     }
+  };
+
+  const handleMessage = message => {
+    setMessage(message);
+    setIsError(false);
+    setTimeout(() => {
+      setMessage('');
+    }, 5000);
+  };
+
+  const handleErrorMessage = message => {
+    setMessage(message);
+    setIsError(true);
+    setTimeout(() => {
+      setMessage('');
+      setIsError(false);
+    }, 5000);
   };
 
   const handleAdd = async event => {
@@ -62,16 +81,22 @@ const App = () => {
       setTitle('');
       setAuthor('');
       setURL('');
-    } catch (e) {}
+      handleMessage(`a new blog ${title} by ${author} added`);
+    } catch (e) {
+      handleErrorMessage(e.response.data.error);
+    }
   };
 
   const handleLogout = async event => {
     event.preventDefault();
+    handleMessage(`${user.name} logged out successfully`);
     setUser(null);
+    window.localStorage.clear();
   };
 
   return (
     <div>
+      {message !== '' && <Notification message={message} isError={isError} />}
       {user == null && (
         <Login
           handleLogin={handleLogin}
