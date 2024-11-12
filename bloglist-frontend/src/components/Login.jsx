@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const Login = ({
   handleLogin,
   username,
@@ -34,3 +36,12 @@ const Login = ({
 };
 
 export default Login;
+
+Login.displayName = 'Login';
+Login.propTypes = {
+  handleLogin: PropTypes.func.isRequired,
+  username: PropTypes.string.isRequired,
+  setUsername: PropTypes.func.isRequired,
+  password: PropTypes.string.isRequired,
+  setPassword: PropTypes.func.isRequired,
+};
