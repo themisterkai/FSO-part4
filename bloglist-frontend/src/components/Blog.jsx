@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
+
 const Blog = ({ blog, handleLikes, handleRemove }) => {
   const [isVisible, setIsVisible] = useState(false);
   const handleSetIsVisible = event => {
@@ -61,3 +63,10 @@ const Blog = ({ blog, handleLikes, handleRemove }) => {
 };
 
 export default Blog;
+
+Blog.displayName = 'Blog';
+Blog.propTypes = {
+  blog: PropTypes.object.isRequired,
+  handleLikes: PropTypes.func.isRequired,
+  handleRemove: PropTypes.func.isRequired,
+};

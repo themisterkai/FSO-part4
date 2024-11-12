@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const Notification = ({ message, isError }) => {
   //
   if (message === null) {
@@ -11,3 +13,9 @@ const Notification = ({ message, isError }) => {
 };
 
 export default Notification;
+
+Notification.displayName = 'Notification';
+Notification.propTypes = {
+  message: PropTypes.string.isRequired,
+  isError: PropTypes.bool.isRequired,
+};
