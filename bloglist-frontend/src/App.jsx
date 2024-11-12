@@ -27,9 +27,10 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log('getting blogs!');
-    blogService.getAll().then(blogs => setBlogs(blogs));
+    blogService.getAll().then(blogs => setBlogs(sortBlog(blogs)));
   }, [user]);
+
+  const sortBlog = blogs => blogs.sort((a, b) => b.likes - a.likes);
 
   const handleLogin = async event => {
     event.preventDefault();
@@ -83,6 +84,30 @@ const App = () => {
     }
   };
 
+  const handleLikes = async (id, blogObject) => {
+    try {
+      const updatedBlog = await blogService.update(id, blogObject);
+      setBlogs(
+        sortBlog(blogs.map(blog => (blog.id === id ? updatedBlog : blog)))
+      );
+      handleMessage(
+        `1 like for ${blogObject.title} by ${blogObject.author} added`
+      );
+    } catch (e) {
+      handleErrorMessage(e.response.data.error);
+    }
+  };
+
+  const handleRemove = async blogObject => {
+    try {
+      await blogService.remove(blogObject.id);
+      setBlogs(sortBlog(blogs.filter(blog => blog.id !== blogObject.id)));
+      handleMessage(`${blogObject.title} by ${blogObject.author} removed`);
+    } catch (e) {
+      handleErrorMessage(e.response.data.error);
+    }
+  };
+
   const handleLogout = async event => {
     event.preventDefault();
     handleMessage(`${user.name} logged out successfully`);
@@ -111,7 +136,12 @@ const App = () => {
           </Togglable>
           <h2>blogs</h2>
           {blogs.map(blog => (
-            <Blog key={blog.id} blog={blog} />
+            <Blog
+              key={blog.id}
+              blog={blog}
+              handleLikes={handleLikes}
+              handleRemove={handleRemove}
+            />
           ))}
         </div>
       )}
