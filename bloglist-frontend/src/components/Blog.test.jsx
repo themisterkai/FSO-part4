@@ -23,7 +23,7 @@ test('renders content when blogs are unexpanded', () => {
   expect(div).not.toHaveTextContent(5);
 });
 
-test('clicking the button calls event handler once', async () => {
+test('renders content when blogs are expanded', async () => {
   const blog = {
     title: 'My Blog',
     author: 'Haida',
@@ -46,4 +46,35 @@ test('clicking the button calls event handler once', async () => {
   expect(div).toHaveTextContent('Haida');
   expect(div).toHaveTextContent('http://myurl.com');
   expect(div).toHaveTextContent(5);
+});
+
+test('clicking like button calls event handler', async () => {
+  const blog = {
+    title: 'My Blog',
+    author: 'Haida',
+    url: 'http://myurl.com',
+    likes: 5,
+  };
+
+  const mockLikeHandler = vi.fn();
+  const mockRemoveHandler = vi.fn();
+
+  render(
+    <Blog
+      blog={blog}
+      handleLikes={mockLikeHandler}
+      handleRemove={mockRemoveHandler}
+    />
+  );
+
+  const user = userEvent.setup();
+  const expandButton = screen.getByText('view');
+  await user.click(expandButton);
+
+  const likeButton = screen.getByText('like');
+  await user.click(likeButton);
+  await user.click(likeButton);
+
+  expect(mockLikeHandler.mock.calls).toHaveLength(2);
+  expect(mockRemoveHandler.mock.calls).toHaveLength(0);
 });
