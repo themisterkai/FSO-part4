@@ -3,17 +3,26 @@ import userEvent from '@testing-library/user-event';
 import Blog from './Blog';
 
 test('renders content when blogs are unexpanded', () => {
+  const username = 'Kai';
   const blog = {
     title: 'My Blog',
     author: 'Haida',
     url: 'http://myurl.com',
     likes: 5,
+    user: {
+      name: 'Kai',
+    },
   };
 
   const mockHandler = vi.fn();
 
   const { container } = render(
-    <Blog blog={blog} handleLikes={mockHandler} handleRemove={mockHandler} />
+    <Blog
+      blog={blog}
+      handleLikes={mockHandler}
+      handleRemove={mockHandler}
+      username={username}
+    />
   );
 
   const div = container.querySelector('.blog');
@@ -24,17 +33,26 @@ test('renders content when blogs are unexpanded', () => {
 });
 
 test('renders content when blogs are expanded', async () => {
+  const username = 'Kai';
   const blog = {
     title: 'My Blog',
     author: 'Haida',
     url: 'http://myurl.com',
     likes: 5,
+    user: {
+      name: 'Kai',
+    },
   };
 
   const mockHandler = vi.fn();
 
   const { container } = render(
-    <Blog blog={blog} handleLikes={mockHandler} handleRemove={mockHandler} />
+    <Blog
+      blog={blog}
+      handleLikes={mockHandler}
+      handleRemove={mockHandler}
+      username={username}
+    />
   );
 
   const user = userEvent.setup();
@@ -49,11 +67,15 @@ test('renders content when blogs are expanded', async () => {
 });
 
 test('clicking like button calls event handler', async () => {
+  const username = 'Kai';
   const blog = {
     title: 'My Blog',
     author: 'Haida',
     url: 'http://myurl.com',
     likes: 5,
+    user: {
+      name: 'Kai',
+    },
   };
 
   const mockLikeHandler = vi.fn();
@@ -64,6 +86,7 @@ test('clicking like button calls event handler', async () => {
       blog={blog}
       handleLikes={mockLikeHandler}
       handleRemove={mockRemoveHandler}
+      username={username}
     />
   );
 
