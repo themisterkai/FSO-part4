@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test');
-const { loginWith } = require('./helpers');
+const { loginWith, createBlog } = require('./helpers');
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -38,6 +38,45 @@ describe('Blog app', () => {
       await expect(
         page.getByText('Kai successfully logged in')
       ).not.toBeVisible();
+    });
+  });
+
+  describe('When logged in', () => {
+    const title1 = 'blog 1';
+    const author1 = 'author 1';
+    const title2 = 'blog 2';
+    const title3 = 'blog 3';
+
+    beforeEach(async ({ page }) => {
+      await loginWith(page, 'kai', 'super');
+    });
+
+    test('a new blog can be created', async ({ page }) => {
+      await createBlog(page, title1, author1, 'url1.com');
+    });
+
+    describe('and a blog exists', () => {
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'blog 1', author1, 'url1.com');
+      });
+
+      test('blog can be liked', async ({ page }) => {
+        const blog = page.locator(`div.blog:has-text("${title1}")`);
+        await blog.getByRole('button', { name: 'view' }).click();
+        await blog.getByRole('button', { name: 'like' }).click();
+        await blog.getByText('1 like').waitFor();
+      });
+
+      test.only('blog can be deleted', async ({ page }) => {
+        const blog = page.locator(`div.blog:has-text("${title1}")`);
+        await blog.getByRole('button', { name: 'view' }).click();
+        page.on('dialog', async dialog => {
+          await dialog.accept(); // Accept the confirmation dialog
+        });
+        await blog.getByRole('button', { name: 'remove' }).click();
+        await expect(blog).not.toBeVisible();
+        await page.getByText(`${title1} by ${author1} removed`).waitFor();
+      });
     });
   });
 });
